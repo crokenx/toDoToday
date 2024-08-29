@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { IonicModule } from '@ionic/angular';
 
@@ -8,13 +8,18 @@ import { FolderPageRoutingModule } from './folder-routing.module';
 
 import { FolderPage } from './folder.page';
 import { ErrorComponent } from '@app/components/error/error.component';
+import { FilterPipe } from '@app/pipes';
+import { FilterTasksPipe } from '@app/pipes';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    FolderPageRoutingModule
+    FolderPageRoutingModule,
+    ReactiveFormsModule,
+    FilterPipe,
+    FilterTasksPipe
   ],
   declarations: [FolderPage, ErrorComponent]
 })

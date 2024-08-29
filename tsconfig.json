@@ -8,7 +8,9 @@
       "@services/*": ["src/app/services/*"],
       "@components/*": ["src/app/components/*"],
       "@environments/*": ["src/environments/*"],
-      "@guards/*": ["src/guards/*"]
+      "@guards/*": ["src/app/guards/*"],
+      "@core/*": ["src/app/core/*"],
+      "@pipes/*": ["src/app/pipes/*"]
     },
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
