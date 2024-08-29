@@ -9,7 +9,6 @@ export const firebaseResolverGuard: CanActivateFn = async (route, state) => {
   let canActivate = true;
 
   try {
-    // throw new Error('Not implemented');
     await firebaseService.init();
   } catch {
     canActivate = false;

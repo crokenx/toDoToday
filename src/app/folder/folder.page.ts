@@ -20,7 +20,6 @@ export class FolderPage implements OnInit {
     { title: 'Spam', url: '/folder/spam', icon: 'warning' },
   ];
 
-
   public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
 
   constructor(private firebaseService: FireBaseService, private storageService: StorageService) {}
