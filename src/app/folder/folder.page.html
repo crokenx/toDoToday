@@ -25,7 +25,8 @@
 
   <ion-item-divider *ngIf="categoriesFilter.length"/>
 
-  <div class="categories-badges">
+  <div class="categories-badges" *ngIf="categoriesFilter.length">
+    <div class="categories-label">Estas filtrando por:</div>
     <ion-badge
       class="categories-badge"
       *ngFor="let category of categoriesFilter"
@@ -50,7 +51,17 @@
         <ion-avatar slot="start">
           <img [src]="'https://picsum.photos/80/80?random=' + task.title" alt="avatar" />
         </ion-avatar>
-        <ion-label>{{ task.title }}</ion-label>
+        <ion-label class="categories-item">
+          {{ task.title }}
+          <ion-badge
+          class="categories-badge"
+          *ngFor="let category of task.categories"
+          [ngStyle]="getBadgeStyle(category)"
+        >
+          {{ category }}
+        </ion-badge>
+        </ion-label>
+
       </ion-item>
 
       <ion-item-options side="end">
@@ -95,6 +106,18 @@
           </ion-badge>
         </div>
 
+        <div class="categories-badges">
+          <ion-badge
+            class="categories-badge"
+            *ngFor="let category of tempCategories"
+            [ngStyle]="getBadgeStyle(category)"
+            (click)="deleteFromTaskCategories(category)"
+          >
+            <ion-icon name="close-outline"></ion-icon>
+            {{ category }}
+          </ion-badge>
+        </div>
+
         <form [formGroup]="formTask">
           <ion-item>
             <ion-label position="stacked">Titulo</ion-label>
@@ -110,11 +133,12 @@
         <form >
           <ion-item>
             <ion-label position="stacked">Nueva categoría?</ion-label>
-            <ion-input [formControl]="formCategory" placeholder="Categoría nueva" (input)="newCategoryOnInput()" (focusout)="newCategoryFocusOut()"></ion-input>
+            <ion-input [formControl]="formCategory" placeholder="Categoría nueva" (input)="newCategoryOnInput()"></ion-input>
           </ion-item>
         </form>
 
-        <div class="categories-badges">
+        <div class="categories-badges" *ngIf="categories.length">
+          <div class="categories-label">Previamente creadas:</div>
           <ion-badge
             class="categories-badge"
             *ngFor="let category of categories | filter:formCategory.value"

@@ -19,6 +19,7 @@ export class FolderPage implements OnInit {
   public categories: string[] = [];
   public categoriesFilter: string[] = [];
   public categoriesForTask: string[] = [];
+  public tempCategories: string[] = [];
 
   public formTask: FormGroup = new FormGroup({
     title: new FormControl(''),
@@ -112,17 +113,22 @@ export class FolderPage implements OnInit {
   };
 
   async createTask(){
+    this.formTask.value.categories = this.tempCategories;
+    this.categories.push(...this.tempCategories);
     const task = this.formTask.value as Task;
     this.storageService.addTask(task);
     await this.storageService.saveAllTasks();
     await this.storageService.saveAllCategories();
     this.formTask.reset(this.resetValues);
+    console.log('form ', this.formTask.value)
     this.modal && this.modal.dismiss();
   }
 
   public async dismissModal(){
     this.modal && this.modal.dismiss();
     this.formTask.reset(this.resetValues);
+    this.formCategory.reset('');
+    this.tempCategories = [];
   }
 
   async newCategoryOnInput(){
@@ -132,7 +138,9 @@ export class FolderPage implements OnInit {
     if(idx > -1) return;
 
     if(category.endsWith(' ')){
-      this.categories.push(category.trim());
+      // this.categories.push(category.trim());
+      this.tempCategories.push(category.trim());
+      this.formTask.value.categories.push(category.trim());
       this.formCategory.reset('');
     }
   }
@@ -159,6 +167,12 @@ export class FolderPage implements OnInit {
     this.categoriesFilter = [...this.categoriesFilter];
   }
 
+  public async deleteFromTaskCategories(category: string){
+    const idx = this.tempCategories.indexOf(category);
+    if(idx === -1)return;
+    this.tempCategories.splice(idx, 1);
+  }
+
   getBadgeStyle(category: string){
     const rgba = this.getRgbaColor(category);
     const hexadecimal = this.getHexadecimalColor(category);
@@ -170,8 +184,10 @@ export class FolderPage implements OnInit {
   }
 
   public addCategoryToTask(category: string){
-    this.formTask.value.categories.push(category);
-    console.log('add category', this.formTask.value)
+    const idx = this.tempCategories.indexOf(category);
+    if(idx > -1)return;
+    this.tempCategories.push(category);
+    this.formCategory.reset('');
   }
 
   getRgbaColor(category: string): string {

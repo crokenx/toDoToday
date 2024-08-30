@@ -36,4 +36,13 @@ ion-menu-button {
     margin: 0 0.5rem;
     border-radius: 5px;
   }
+
+  &-label {
+    margin-bottom: 1rem;
+  }
+
+  &-item {
+    display: flex;
+    align-content: center;
+  }
 }
