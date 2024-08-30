@@ -1,9 +1,10 @@
 import { Task, TaskStatus } from '@core/task';
-import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FireBaseService, StorageService } from '@app/services';
 import { ActionSheetController } from '@ionic/angular';
 import { FormControl, FormGroup } from '@angular/forms';
+import { v4 as uuidv4 } from 'uuid';
 
 @Component({
   selector: 'app-folder',
@@ -12,7 +13,6 @@ import { FormControl, FormGroup } from '@angular/forms';
 })
 export class FolderPage implements OnInit {
   @ViewChild('modal', { static: false }) modal: any;
-  @ViewChild('modalEdit') modalEdit: any;
   public folder!: string;
   private activatedRoute = inject(ActivatedRoute);
   public tasks: Task[] = [];
@@ -20,8 +20,10 @@ export class FolderPage implements OnInit {
   public categoriesFilter: string[] = [];
   public categoriesForTask: string[] = [];
   public tempCategories: string[] = [];
+  public editMode: boolean = false;
 
   public formTask: FormGroup = new FormGroup({
+    id: new FormControl(uuidv4()),
     title: new FormControl(''),
     description: new FormControl(''),
     status: new FormControl(TaskStatus.PENDING),
@@ -33,13 +35,14 @@ export class FolderPage implements OnInit {
   public formCategory: FormControl = new FormControl('');
 
   public resetValues: Task = {
+    id: uuidv4(),
     title: '',
     description: '',
     status: TaskStatus.PENDING,
     createdAt: new Date(),
     updatedAt: new Date(),
     categories: [],
-  }
+  };
 
   public appPages = [
     { title: 'Inbox', url: '/folder/inbox', icon: 'mail' },
@@ -68,6 +71,7 @@ export class FolderPage implements OnInit {
 
   public getTasks(){
     this.tasks = this.storageService.getAllTasks();
+    this.tasks = [...this.tasks];
   }
 
   public async getCategories(){
@@ -78,7 +82,7 @@ export class FolderPage implements OnInit {
     this.firebaseService.fetchValue();
   }
 
-  canDismiss = async () => {
+  public canDismiss = async () => {
 
     const task = this.formTask.value as Task;
 
@@ -107,21 +111,52 @@ export class FolderPage implements OnInit {
     this.formTask.reset(this.resetValues);
 
     if(role === 'confirm'){
+      this.editMode = false;
       return true;
     };
     return false;
   };
 
   async createTask(){
+    this.editMode = false;
     this.formTask.value.categories = this.tempCategories;
-    this.categories.push(...this.tempCategories);
     const task = this.formTask.value as Task;
+    const idx = this.tasks.findIndex(t => t.id === task.id);
+
+    console.log("idex ", idx)
+
+    if(idx > -1){
+      this.patchTask(task, idx);
+      return;
+    };
+
+
+    console.log(this.formTask.value)
+    this.sieveCategories();
+
     this.storageService.addTask(task);
     await this.storageService.saveAllTasks();
     await this.storageService.saveAllCategories();
     this.formTask.reset(this.resetValues);
-    console.log('form ', this.formTask.value)
+    this.tempCategories = [];
     this.modal && this.modal.dismiss();
+    this.getTasks();
+  }
+
+  public async patchTask(task: Task, idx: number){
+    this.sieveCategories();
+    this.storageService.patchTask(task, idx);
+    await this.storageService.saveAllTasks();
+    await this.storageService.saveAllCategories();
+    this.formTask.reset(this.resetValues);
+    this.tempCategories = [];
+    this.modal && this.modal.dismiss();
+    this.getTasks();
+  }
+
+  public sieveCategories(){
+    const newCategories = this.tempCategories.filter(category => !this.categories.includes(category));
+    this.categories.push(...newCategories);
   }
 
   public async dismissModal(){
@@ -138,19 +173,15 @@ export class FolderPage implements OnInit {
     if(idx > -1) return;
 
     if(category.endsWith(' ')){
-      // this.categories.push(category.trim());
+
+      const idx = this.tempCategories.indexOf(category.trim());
+
+      if(idx > -1) return;
+
       this.tempCategories.push(category.trim());
-      this.formTask.value.categories.push(category.trim());
+
       this.formCategory.reset('');
     }
-  }
-
-  async newCategoryFocusOut(){
-    const category = this.formCategory.value
-    const idx = this.categories.indexOf(category);
-    if(!category.length) return;
-    this.categories.push(category.trim());
-    this.formCategory.reset('');
   }
 
   public async addToCategoryFilter(category: string){
@@ -171,6 +202,61 @@ export class FolderPage implements OnInit {
     const idx = this.tempCategories.indexOf(category);
     if(idx === -1)return;
     this.tempCategories.splice(idx, 1);
+  }
+
+  public async deleteTask(task: Task){
+
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Perderas la tarea, deseas eliminarla?',
+      buttons: [
+        {
+          text: 'Si',
+          role: 'confirm',
+        },
+        {
+          text: 'No',
+          role: 'cancel',
+        },
+      ],
+    });
+
+    actionSheet.present();
+
+    const { role } = await actionSheet.onWillDismiss();
+
+    if(role === 'cancel') return;
+
+    await this.storageService.removeTask(task);
+    this.getTasks();
+  }
+
+  public async archiveTask(task: Task){
+    task.status = TaskStatus.COMPLETED;
+    await this.storageService.saveAllTasks();
+    this.getTasks();
+  }
+
+  public async taskDone(task: Task, e: CustomEvent){
+    const isChecked = e.detail.checked;
+    if(isChecked) {
+      task.status = TaskStatus.COMPLETED;
+    }else {
+      task.status = TaskStatus.PENDING;
+    }
+
+    await this.storageService.saveAllTasks();
+    this.getTasks();
+  }
+
+  public isChecked(task: Task){
+    return task.status === TaskStatus.COMPLETED;
+  }
+
+  public editTask(task: Task){
+    this.formTask.patchValue(task);
+    this.tempCategories = task.categories;
+    this.editMode = true;
+    this.modal && this.modal.present();
   }
 
   getBadgeStyle(category: string){

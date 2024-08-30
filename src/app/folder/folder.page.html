@@ -39,36 +39,32 @@
   </div>
 
   <ion-list>
-    <ion-item-sliding *ngFor="let task of tasks | filterTasks:categoriesFilter;">
+    <ion-item-sliding *ngFor="let task of tasks | filterTasks:categoriesFilter | filterCompleted;">
 
       <ion-item-options side="start">
-        <ion-item-option color="success">
+        <ion-item-option color="success" (click)="archiveTask(task)">
           <ion-icon slot="icon-only" name="archive"></ion-icon>
         </ion-item-option>
       </ion-item-options>
 
-      <ion-item [button]="true"  detail="false">
-        <ion-avatar slot="start">
-          <img [src]="'https://picsum.photos/80/80?random=' + task.title" alt="avatar" />
-        </ion-avatar>
+      <ion-item  detail="false" (click)="editTask(task)">
         <ion-label class="categories-item">
           {{ task.title }}
           <ion-badge
-          class="categories-badge"
-          *ngFor="let category of task.categories"
-          [ngStyle]="getBadgeStyle(category)"
-        >
-          {{ category }}
-        </ion-badge>
+            class="categories-badge"
+            *ngFor="let category of task.categories"
+            [ngStyle]="getBadgeStyle(category)"
+          >
+            {{ category }}
+          </ion-badge>
         </ion-label>
-
+        <div slot="end" style="position: relative">
+          <ion-checkbox (ionChange)="taskDone(task, $event)" [checked]="isChecked(task)"></ion-checkbox>
+        </div>
       </ion-item>
 
       <ion-item-options side="end">
-        <ion-item-option>
-          <ion-icon slot="icon-only" name="heart"></ion-icon>
-        </ion-item-option>
-        <ion-item-option color="danger">
+        <ion-item-option color="danger" (click)="deleteTask(task)">
           <ion-icon slot="icon-only" name="trash"></ion-icon>
         </ion-item-option>
       </ion-item-options>
@@ -125,9 +121,9 @@
           </ion-item>
           <ion-item>
             <ion-label position="stacked">Descripción</ion-label>
-            <ion-textarea formControlName="description" placeholder="Descripción de la tarea" required></ion-textarea>
+            <ion-textarea formControlName="description" placeholder="Descripción de la tarea"></ion-textarea>
           </ion-item>
-          <ion-button expand="block" (click)="createTask()" [disabled]="formTask.invalid">Save</ion-button>
+
         </form>
 
         <form >
@@ -137,8 +133,10 @@
           </ion-item>
         </form>
 
+        <ion-button expand="block" (click)="createTask()" [disabled]="formTask.invalid">Save</ion-button>
+
         <div class="categories-badges" *ngIf="categories.length">
-          <div class="categories-label">Previamente creadas:</div>
+          <div class="categories-label">Categorias previamente creadas:</div>
           <ion-badge
             class="categories-badge"
             *ngFor="let category of categories | filter:formCategory.value"

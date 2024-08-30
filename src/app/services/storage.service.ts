@@ -32,8 +32,8 @@ export class StorageService {
 
   public async removeTask(task: Task) {
     const toRemove = task.title
-
     this.tasks = this.tasks.filter(task => task.title !== toRemove);
+    await this.saveAllTasks();
   }
 
   public getAllTasks() {
@@ -45,10 +45,19 @@ export class StorageService {
   }
 
   async saveAllTasks() {
+    console.log("edited tasks in storage ", this.tasks)
       await this._storage?.set('tasks', this.tasks);
+  }
+
+  public patchTask(task: Task, idx: number) {
+    this.tasks[idx] = task;
   }
 
   async saveAllCategories() {
     await this._storage?.set('categories', this.categories);
+  }
+
+  async clearStorage() {
+    await this._storage?.clear();
   }
 }

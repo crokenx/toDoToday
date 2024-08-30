@@ -10,6 +10,7 @@ import { FolderPage } from './folder.page';
 import { ErrorComponent } from '@app/components/error/error.component';
 import { FilterPipe } from '@app/pipes';
 import { FilterTasksPipe } from '@app/pipes';
+import { FilterCompletedPipe } from '@app/pipes';
 
 @NgModule({
   imports: [
@@ -19,7 +20,8 @@ import { FilterTasksPipe } from '@app/pipes';
     FolderPageRoutingModule,
     ReactiveFormsModule,
     FilterPipe,
-    FilterTasksPipe
+    FilterTasksPipe,
+    FilterCompletedPipe
   ],
   declarations: [FolderPage, ErrorComponent]
 })
