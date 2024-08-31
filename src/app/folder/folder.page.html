@@ -1,4 +1,4 @@
-<ion-header [translucent]="true" fixed-slot-placement="before">
+<ion-header fixed-slot-placement="before">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
@@ -8,11 +8,6 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">{{ folder }}</ion-title>
-    </ion-toolbar>
-  </ion-header>
 
   <p class="categories-select">{{ canDeleteCategories ? 'Elimina' : 'Selecciona' }} una categoría:</p>
   <div class="badges-container">
@@ -66,23 +61,24 @@
         detail="false"
         *ngFor="let task of tasks | filterTasks:categoriesFilter | filterCompleted:nowShowing;"
         >
-        <ion-icon class="pointer" *ngIf="doneIcon(task); else undoneTask" name="checkmark" (click)="taskDone(task)"></ion-icon>
+        <ion-icon class="pointer" *ngIf="doneIcon(task); else undoneTask" name="checkmark" (click)="taskDone(task)" size="medium"></ion-icon>
         <ng-template #undoneTask>
-          <ion-icon class="pointer" name="arrow-redo" (click)="taskDone(task)"></ion-icon>
+          <ion-icon class="pointer" name="arrow-redo" (click)="taskDone(task)" size="medium"></ion-icon>
         </ng-template>
         <ion-label class="categories-label" (click)="editTask(task)" button="true">
-          <h4>{{ task.title }}</h4>
-          <p>{{ task.description }}</p>
+          <h4 class="categories-title">{{ task.title }}</h4>
+          <p class="categories-description">{{ task.description }}</p>
         </ion-label>
-        <ion-badge
-        class="categories-badge"
-        *ngFor="let category of task.categories"
-        [ngClass]="{ 'red-strikethrough': wasDeleted(category) }"
-        [ngStyle]="getBadgeStyle(category)"
-        >
-          {{ category }}
-        </ion-badge>
-        <ion-icon *ngIf="canDeleteTask" class="pointer" name="trash" (click)="deleteTask(task)"></ion-icon>
+        <div class="badges-container" (click)="editTask(task)">
+          <ion-badge
+          class="categories-badge"
+          *ngFor="let category of task.categories | filterBadges"
+          [ngStyle]="getBadgeStyle(category)"
+          >
+            {{ category }}
+          </ion-badge>
+        </div>
+        <ion-icon *ngIf="canDeleteTask" class="pointer" name="trash" (click)="deleteTask(task)" size="medium"></ion-icon>
       </ion-item>
   </ion-list>
 

@@ -8,7 +8,7 @@ import { FolderPageRoutingModule } from './folder-routing.module';
 
 import { FolderPage } from './folder.page';
 import { ErrorComponent } from '@app/components/error/error.component';
-import { FilterPipe } from '@app/pipes';
+import { FilterBadgesPipe, FilterPipe } from '@app/pipes';
 import { FilterTasksPipe } from '@app/pipes';
 import { FilterCompletedPipe } from '@app/pipes';
 
@@ -21,7 +21,8 @@ import { FilterCompletedPipe } from '@app/pipes';
     ReactiveFormsModule,
     FilterPipe,
     FilterTasksPipe,
-    FilterCompletedPipe
+    FilterCompletedPipe,
+    FilterBadgesPipe,
   ],
   declarations: [FolderPage, ErrorComponent]
 })

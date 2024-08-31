@@ -1,0 +1,23 @@
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'filterBadges',
+  standalone: true
+})
+export class FilterBadgesPipe implements PipeTransform {
+
+  transform(categories: string[]): string[] {
+    if (!categories) return [];
+    if (!categories.length) return [];
+
+    if (categories.length > 3) {
+      const length = categories.length;
+      const badges = categories.slice(0, 2)
+      badges.push('+' + (length - 2));
+      return badges;
+    }
+
+    return categories;
+  }
+
+}
