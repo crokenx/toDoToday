@@ -47,9 +47,10 @@
         [ngStyle]="getBadgeStyle(category)"
         (click)="deleteFromCategoryFilter(category)"
         >
-        <ion-icon name="close-outline"></ion-icon>
-        {{ category }}
+          <ion-icon name="close-outline"></ion-icon>
+          {{ category }}
         </ion-badge>
+        <p *ngIf="!categoriesFilter.length">---</p>
     </div>
   </div>
 
