@@ -7,10 +7,12 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class FilterCompletedPipe implements PipeTransform {
 
-  transform(tasks: Task[]): Task[] {
+  transform(tasks: Task[], nowShowing: string): Task[] {
     if (!tasks.length) return [];
+    console.log(nowShowing)
+    const status = nowShowing === 'todo' ? TaskStatus.PENDING : TaskStatus.COMPLETED;
 
-    tasks = tasks.filter(task => task.status !== TaskStatus.COMPLETED);
+    tasks = tasks.filter(task => task.status === status);
 
     return tasks;
   }

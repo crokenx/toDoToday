@@ -21,6 +21,9 @@ export class FolderPage implements OnInit {
   public categoriesForTask: string[] = [];
   public tempCategories: string[] = [];
   public editMode: boolean = false;
+  public nowShowing: string = "todo";
+  public canDeleteCategories: boolean = false;
+  public canDeleteTask: boolean = true;
 
   public formTask: FormGroup = new FormGroup({
     id: new FormControl(uuidv4()),
@@ -34,28 +37,7 @@ export class FolderPage implements OnInit {
 
   public formCategory: FormControl = new FormControl('');
 
-  public resetValues: Task = {
-    id: uuidv4(),
-    title: '',
-    description: '',
-    status: TaskStatus.PENDING,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    categories: [],
-  };
-
-  public appPages = [
-    { title: 'Inbox', url: '/folder/inbox', icon: 'mail' },
-    { title: 'Outbox', url: '/folder/outbox', icon: 'paper-plane' },
-    { title: 'Favorites', url: '/folder/favorites', icon: 'heart' },
-    { title: 'Archived', url: '/folder/archived', icon: 'archive' },
-    { title: 'Trash', url: '/folder/trash', icon: 'trash' },
-    { title: 'Spam', url: '/folder/spam', icon: 'warning' },
-  ];
-
-  public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
-
-  presentingElement = null;
+  public presentingElement = null;
 
   constructor(
     private firebaseService: FireBaseService,
@@ -67,6 +49,7 @@ export class FolderPage implements OnInit {
     this.folder = this.activatedRoute.snapshot.paramMap.get('id') as string;
     this.getTasks();
     this.getCategories();
+    this.fetchRemoteConfig();
   }
 
   public getTasks(){
@@ -78,8 +61,9 @@ export class FolderPage implements OnInit {
     this.categories = this.storageService.getAllCategories();
   }
 
-  public async fetchValue(){
-    this.firebaseService.fetchValue();
+  public async fetchRemoteConfig(){
+    const canDelete = await this.firebaseService.fetchCanDeleteTask();
+    this.canDeleteTask = canDelete;
   }
 
   public canDismiss = async () => {
@@ -108,7 +92,7 @@ export class FolderPage implements OnInit {
 
     const { role } = await actionSheet.onWillDismiss();
 
-    this.formTask.reset(this.resetValues);
+    this.resetForm();
 
     if(role === 'confirm'){
       this.editMode = false;
@@ -119,36 +103,64 @@ export class FolderPage implements OnInit {
 
   async createTask(){
     this.editMode = false;
+    this.newCategoryOnCreateTask();
     this.formTask.value.categories = this.tempCategories;
     const task = this.formTask.value as Task;
     const idx = this.tasks.findIndex(t => t.id === task.id);
-
-    console.log("idex ", idx)
-
-    if(idx > -1){
+    if(idx > -1) {
       this.patchTask(task, idx);
-      return;
-    };
-
-
-    console.log(this.formTask.value)
+      return
+    }
     this.sieveCategories();
-
     this.storageService.addTask(task);
     await this.storageService.saveAllTasks();
     await this.storageService.saveAllCategories();
-    this.formTask.reset(this.resetValues);
+    this.resetForm();
+
     this.tempCategories = [];
     this.modal && this.modal.dismiss();
     this.getTasks();
   }
 
+  public resetForm(){
+    const resetValues: Task = {
+      id: uuidv4(),
+      title: '',
+      description: '',
+      status: TaskStatus.PENDING,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      categories: [],
+    };
+
+    this.formTask.reset(resetValues);
+  }
+
+  async newCategoryOnCreateTask(){
+    const category = this.formCategory.value;
+    if(category.length === 0) return;
+    const idx = this.categories.indexOf(category);
+    if(idx > -1) return this.newCategoryForTask(category);
+    const index = this.tempCategories.indexOf(category);
+    if(index > -1) return;
+    this.tempCategories.push(category);
+    this.formCategory.reset('');
+  }
+
+  public newCategoryForTask(category: string){
+    const idx = this.tempCategories.indexOf(category);
+    if(idx > -1) return;
+    this.tempCategories.push(category);
+    this.formCategory.reset('');
+  }
+
   public async patchTask(task: Task, idx: number){
+    console.log("patch??")
     this.sieveCategories();
     this.storageService.patchTask(task, idx);
     await this.storageService.saveAllTasks();
     await this.storageService.saveAllCategories();
-    this.formTask.reset(this.resetValues);
+    this.resetForm();
     this.tempCategories = [];
     this.modal && this.modal.dismiss();
     this.getTasks();
@@ -160,8 +172,9 @@ export class FolderPage implements OnInit {
   }
 
   public async dismissModal(){
+    this.editMode = false;
     this.modal && this.modal.dismiss();
-    this.formTask.reset(this.resetValues);
+    this.resetForm();
     this.formCategory.reset('');
     this.tempCategories = [];
   }
@@ -185,10 +198,24 @@ export class FolderPage implements OnInit {
   }
 
   public async addToCategoryFilter(category: string){
+    if(this.canDeleteCategories) return this.deleteCategory(category);
     const idx = this.categoriesFilter.indexOf(category);
     if(idx > -1)return;
     this.categoriesFilter.push(category);
     this.categoriesFilter = [...this.categoriesFilter];
+  }
+
+  public wasDeleted(category: string){
+    const idx = this.categories.indexOf(category);
+    return idx === -1;
+  }
+
+  public async deleteCategory(category: string) {
+    const idx = this.categories.indexOf(category);
+    if(idx === -1) return;
+    this.categories.splice(idx, 1);
+    await this.storageService.saveAllCategories();
+    this.canDeleteCategories = false;
   }
 
   public async deleteFromCategoryFilter(category: string){
@@ -236,23 +263,28 @@ export class FolderPage implements OnInit {
     this.getTasks();
   }
 
-  public async taskDone(task: Task, e: CustomEvent){
-    const isChecked = e.detail.checked;
-    if(isChecked) {
-      task.status = TaskStatus.COMPLETED;
-    }else {
+  public async taskDone(task: Task){
+    if(task.status === TaskStatus.COMPLETED){
       task.status = TaskStatus.PENDING;
+    } else {
+      task.status = TaskStatus.COMPLETED;
     }
 
     await this.storageService.saveAllTasks();
     this.getTasks();
   }
 
-  public isChecked(task: Task){
-    return task.status === TaskStatus.COMPLETED;
+  public doneIcon(task: Task){
+    return task.status === TaskStatus.PENDING;
+  }
+
+  public whichColor(task: Task){
+    const completed = task.status === TaskStatus.COMPLETED;
+    return completed ? 'primary' : 'success';
   }
 
   public editTask(task: Task){
+    this.editMode = true;
     this.formTask.patchValue(task);
     this.tempCategories = task.categories;
     this.editMode = true;
@@ -276,7 +308,7 @@ export class FolderPage implements OnInit {
     this.formCategory.reset('');
   }
 
-  getRgbaColor(category: string): string {
+  public getRgbaColor(category: string): string {
     const hash = Array.from(category).reduce((acc, char) => {
       const code = char.charCodeAt(0);
       return (acc << 5) - acc + code;
@@ -290,7 +322,7 @@ export class FolderPage implements OnInit {
     return `rgba(${r}, ${g}, ${b}, ${0.5})`;
   }
 
-  getHexadecimalColor(category: string): string {
+  public getHexadecimalColor(category: string): string {
     const hash = Array.from(category).reduce((acc, char) => {
       const code = char.charCodeAt(0);
       return (acc << 5) - acc + code;

@@ -28,8 +28,18 @@ ion-menu-button {
 }
 
 .categories {
+
+  &-select {
+    margin-left: 1rem;
+  }
+
   &-badges {
-    margin: 1rem;
+    margin-top: 1rem;
+    margin-left: 1rem;
+
+    &-previously {
+      margin: 0.5rem;
+    }
   }
 
   &-badge {
@@ -38,11 +48,44 @@ ion-menu-button {
   }
 
   &-label {
-    margin-bottom: 1rem;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 1rem;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
+
+.badges {
+  &-container {
+    display: flex;
+    align-items: center;
   }
 
-  &-item {
-    display: flex;
-    align-content: center;
+  &-edit {
+    margin-left: 1rem;
   }
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.tremble {
+  animation: tilt-n-move-shaking 0.20s infinite;
+}
+
+.red-strikethrough {
+  text-decoration: line-through;
+  text-decoration-color: black; /* Color of the line */
+}
+
+@keyframes tilt-n-move-shaking {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(2px, 2px) rotate(5deg); }
+  50% { transform: translate(0, 0) rotate(0eg); }
+  75% { transform: translate(-2px, 2px) rotate(-5deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
 }

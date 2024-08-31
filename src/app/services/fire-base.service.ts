@@ -10,6 +10,7 @@ export class FireBaseService {
 
   private fireBaseApp!: FirebaseApp;
   private remoteConfig!: RemoteConfig;
+  public canDeleteTask: boolean = true;
 
   constructor() {
   }
@@ -25,9 +26,10 @@ export class FireBaseService {
     await fetchAndActivate(this.remoteConfig)
   }
 
-  public async fetchValue(){
-    const response = getValue(this.remoteConfig, "welcome");
-    const response2 = getValue(this.remoteConfig, "message");
-    console.log(response, response2)
+  public async fetchCanDeleteTask(){
+    const res = getValue(this.remoteConfig, "can_delete_task");
+    this.canDeleteTask = res.asBoolean();
+    console.log("feature flag ", this.canDeleteTask)
+    return this.canDeleteTask;
   }
 }

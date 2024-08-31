@@ -31,8 +31,8 @@ export class StorageService {
   }
 
   public async removeTask(task: Task) {
-    const toRemove = task.title
-    this.tasks = this.tasks.filter(task => task.title !== toRemove);
+    const toRemove = task.id
+    this.tasks = this.tasks.filter(task => task.id !== toRemove);
     await this.saveAllTasks();
   }
 
