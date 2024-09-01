@@ -1,3 +1,4 @@
+
 import { Task, TaskStatus } from '@core/task';
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -6,13 +7,15 @@ import { ActionSheetController } from '@ionic/angular';
 import { FormControl, FormGroup } from '@angular/forms';
 import { v4 as uuidv4 } from 'uuid';
 
+import { config } from './folder.config';
+
 @Component({
   selector: 'app-folder',
   templateUrl: './folder.page.html',
   styleUrls: ['./folder.page.scss'],
 })
 export class FolderPage implements OnInit {
-  @ViewChild('modal', { static: false }) modal: any;
+  @ViewChild(config.modal.name, { static: false }) modal: any;
   public folder!: string;
   private activatedRoute = inject(ActivatedRoute);
   public tasks: Task[] = [];
@@ -21,7 +24,7 @@ export class FolderPage implements OnInit {
   public categoriesForTask: string[] = [];
   public tempCategories: string[] = [];
   public editMode: boolean = false;
-  public nowShowing: string = "todo";
+  public nowShowing: string = config.showing.default;
   public canDeleteCategories: boolean = false;
   public canDeleteTask: boolean = true;
 
@@ -67,51 +70,21 @@ export class FolderPage implements OnInit {
   }
 
   public async cannotDeleteTask(){
-    const actionSheet = await this.actionSheetCtrl.create({
-      header: 'Tenemos problemas en nuestros servidores',
-      subHeader: 'No puedes eliminar tareas en este momento',
-      buttons: [
-        {
-          text: 'Ok',
-          role: 'confirm',
-        }
-      ],
-    });
-
+    const actionSheet = await this.actionSheetCtrl.create(config.cannotDeleteTask);
     actionSheet.present();
-
     await actionSheet.onWillDismiss();
   }
 
   public canDismiss = async () => {
-
     const task = this.formTask.value as Task;
-
     if(!task.title.length && !task.description.length) {
       return true;
     }
-
-    const actionSheet = await this.actionSheetCtrl.create({
-      header: 'Perderas la tarea, deseas salir de todos modos?',
-      buttons: [
-        {
-          text: 'Si',
-          role: 'confirm',
-        },
-        {
-          text: 'No',
-          role: 'cancel',
-        },
-      ],
-    });
-
+    const actionSheet = await this.actionSheetCtrl.create(config.dismissConfirmation);
     actionSheet.present();
-
     const { role } = await actionSheet.onWillDismiss();
-
     this.resetForm();
-
-    if(role === 'confirm'){
+    if(role === config.deleteComparation.default){
       this.editMode = false;
       return true;
     };
@@ -198,17 +171,11 @@ export class FolderPage implements OnInit {
   async newCategoryOnInput(){
     const category = this.formCategory.value;
     const idx = this.categories.indexOf(category.trim());
-
     if(idx > -1) return;
-
     if(category.endsWith(' ')){
-
       const idx = this.tempCategories.indexOf(category.trim());
-
       if(idx > -1) return;
-
       this.tempCategories.push(category.trim());
-
       this.formCategory.reset('');
     }
   }
@@ -248,27 +215,10 @@ export class FolderPage implements OnInit {
   }
 
   public async deleteTask(task: Task){
-
-    const actionSheet = await this.actionSheetCtrl.create({
-      header: 'Perderas la tarea, deseas eliminarla?',
-      buttons: [
-        {
-          text: 'Si',
-          role: 'confirm',
-        },
-        {
-          text: 'No',
-          role: 'cancel',
-        },
-      ],
-    });
-
+    const actionSheet = await this.actionSheetCtrl.create(config.deleteConfirmation);
     actionSheet.present();
-
     const { role } = await actionSheet.onWillDismiss();
-
-    if(role === 'cancel' || role === 'backdrop') return;
-
+    if(role === config.cancelComparation.default || role === config.backdropComparation.default) return;
     await this.storageService.removeTask(task);
     this.getTasks();
   }
@@ -294,11 +244,6 @@ export class FolderPage implements OnInit {
     return task.status === TaskStatus.PENDING;
   }
 
-  public whichColor(task: Task){
-    const completed = task.status === TaskStatus.COMPLETED;
-    return completed ? 'primary' : 'success';
-  }
-
   public editTask(task: Task){
     this.editMode = true;
     this.formTask.patchValue(task);
@@ -307,7 +252,7 @@ export class FolderPage implements OnInit {
     this.modal && this.modal.present();
   }
 
-  getBadgeStyle(category: string){
+  public getBadgeStyle(category: string){
     const rgba = this.getRgbaColor(category);
     const hexadecimal = this.getHexadecimalColor(category);
 
