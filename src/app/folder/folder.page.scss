@@ -59,6 +59,11 @@ ion-menu-button {
     max-width: 70px;
   }
 
+  &-badge-edit {
+    margin: 0 0.2rem;
+    border-radius: 5px;
+  }
+
   &-label {
     margin-top: 0;
     margin-bottom: 0;

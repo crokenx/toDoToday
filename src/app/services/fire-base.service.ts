@@ -29,7 +29,6 @@ export class FireBaseService {
   public async fetchCanDeleteTask(){
     const res = getValue(this.remoteConfig, "can_delete_task");
     this.canDeleteTask = res.asBoolean();
-    console.log("feature flag ", this.canDeleteTask)
     return this.canDeleteTask;
   }
 }

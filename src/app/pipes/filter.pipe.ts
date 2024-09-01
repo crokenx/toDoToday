@@ -12,8 +12,6 @@ export class FilterPipe implements PipeTransform {
 
     searchTerm = searchTerm.toLowerCase();
 
-    console.log("filter categories ", categories)
-
     return categories.filter(category =>
       category.toLowerCase().includes(searchTerm)
     );

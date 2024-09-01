@@ -19,7 +19,6 @@ export class StorageService {
     this._storage = await this.storage.create();
     this.tasks = await this._storage.get('tasks') || [];
     this.categories = await this._storage.get('categories') || [];
-    console.log("categories ", this.categories)
   }
 
   public async addTask(task: Task) {
@@ -45,7 +44,6 @@ export class StorageService {
   }
 
   async saveAllTasks() {
-    console.log("edited tasks in storage ", this.tasks)
       await this._storage?.set('tasks', this.tasks);
   }
 

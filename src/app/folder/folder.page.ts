@@ -172,7 +172,6 @@ export class FolderPage implements OnInit {
   }
 
   public async patchTask(task: Task, idx: number){
-    console.log("patch??")
     this.sieveCategories();
     this.storageService.patchTask(task, idx);
     await this.storageService.saveAllTasks();
@@ -268,7 +267,7 @@ export class FolderPage implements OnInit {
 
     const { role } = await actionSheet.onWillDismiss();
 
-    if(role === 'cancel') return;
+    if(role === 'cancel' || role === 'backdrop') return;
 
     await this.storageService.removeTask(task);
     this.getTasks();

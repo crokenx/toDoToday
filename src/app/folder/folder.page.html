@@ -17,7 +17,7 @@
     <div class="categories-badges">
       <ion-badge
         [ngClass]="{ 'tremble': canDeleteCategories }"
-        class="categories-badge"
+        class="categories-badge-edit"
         *ngFor="let category of categories; let i = index"
         [ngStyle]="getBadgeStyle(category)"
         (click)="addToCategoryFilter(category)"
@@ -33,7 +33,7 @@
     <div class="categories-label">
         <p>Estas filtrando por:</p>
         <ion-badge
-        class="categories-badge"
+        class="categories-badge-edit"
         *ngFor="let category of categoriesFilter"
         [ngStyle]="getBadgeStyle(category)"
         (click)="deleteFromCategoryFilter(category)"
@@ -122,7 +122,7 @@
 
         <div class="categories-badges">
           <ion-badge
-            class="categories-badge"
+            class="categories-badge-edit"
             *ngFor="let category of tempCategories"
             [ngStyle]="getBadgeStyle(category)"
             (click)="deleteFromTaskCategories(category)"

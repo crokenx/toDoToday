@@ -8,8 +8,6 @@ import { Task } from '@app/core';
 export class FilterTasksPipe implements PipeTransform {
 
   transform(tasks: Task[], categories: string[]): Task[] {
-    console.log("tasks ", tasks)
-    console.log("categories ", categories)
     if (!tasks.length) return [];
     if (!categories.length) return tasks;
 
