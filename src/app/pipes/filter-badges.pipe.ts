@@ -10,10 +10,10 @@ export class FilterBadgesPipe implements PipeTransform {
     if (!categories) return [];
     if (!categories.length) return [];
 
-    if (categories.length > 3) {
+    if (categories.length > 2) {
       const length = categories.length;
-      const badges = categories.slice(0, 2)
-      badges.push('+' + (length - 2));
+      const badges = categories.slice(0, 1)
+      badges.push('+' + (length - 1));
       return badges;
     }
 

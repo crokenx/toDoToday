@@ -46,7 +46,6 @@ export class FolderPage implements OnInit {
   ) {}
 
   async ngOnInit() {
-    this.folder = this.activatedRoute.snapshot.paramMap.get('id') as string;
     this.getTasks();
     this.getCategories();
     this.fetchRemoteConfig();
@@ -64,6 +63,24 @@ export class FolderPage implements OnInit {
   public async fetchRemoteConfig(){
     const canDelete = await this.firebaseService.fetchCanDeleteTask();
     this.canDeleteTask = canDelete;
+    if(!this.canDeleteTask) this.cannotDeleteTask();
+  }
+
+  public async cannotDeleteTask(){
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Tenemos problemas en nuestros servidores',
+      subHeader: 'No puedes eliminar tareas en este momento',
+      buttons: [
+        {
+          text: 'Ok',
+          role: 'confirm',
+        }
+      ],
+    });
+
+    actionSheet.present();
+
+    await actionSheet.onWillDismiss();
   }
 
   public canDismiss = async () => {
