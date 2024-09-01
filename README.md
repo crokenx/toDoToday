@@ -1,5 +1,3 @@
-[TOC]
-
 ## Requerimientos
 
 - Android Studio
