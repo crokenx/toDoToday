@@ -27,15 +27,6 @@
     </div>
   </div>
 
-  <ion-segment [(ngModel)]="nowShowing">
-    <ion-segment-button value="todo">
-      <ion-label>Por hacer</ion-label>
-    </ion-segment-button>
-    <ion-segment-button value="done">
-      <ion-label>Completadas</ion-label>
-    </ion-segment-button>
-  </ion-segment>
-
   <ion-item-divider/>
 
   <div class="categories-badges">
@@ -53,6 +44,17 @@
         <p *ngIf="!categoriesFilter.length">---</p>
     </div>
   </div>
+
+  <ion-item-divider/>
+
+  <ion-segment [(ngModel)]="nowShowing">
+    <ion-segment-button value="todo">
+      <ion-label>Por hacer</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="done">
+      <ion-label>Completadas</ion-label>
+    </ion-segment-button>
+  </ion-segment>
 
   <ion-item-divider/>
 
@@ -80,6 +82,11 @@
           </ion-badge>
         </div>
         <ion-icon *ngIf="canDeleteTask" class="pointer" name="trash" (click)="deleteTask(task)" size="medium"></ion-icon>
+      </ion-item>
+      <!-- this two ion items are necessary so the add button won't stop the user from deleting tasks -->
+      <ion-item lines="none">
+      </ion-item>
+      <ion-item lines="none">
       </ion-item>
   </ion-list>
 
