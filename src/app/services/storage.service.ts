@@ -4,6 +4,8 @@ import { Storage } from '@ionic/storage-angular';
 
 import { Task, TaskStatus } from '@core/task';
 
+import { config } from './config.storage'
+
 @Injectable({
   providedIn: 'root'
 })
@@ -17,8 +19,8 @@ export class StorageService {
 
   async init() {
     this._storage = await this.storage.create();
-    this.tasks = await this._storage.get('tasks') || [];
-    this.categories = await this._storage.get('categories') || [];
+    this.tasks = await this._storage.get(config.storageTaskKey) || [];
+    this.categories = await this._storage.get(config.storageCategoriesKey) || [];
   }
 
   public async addTask(task: Task) {
@@ -44,7 +46,7 @@ export class StorageService {
   }
 
   async saveAllTasks() {
-      await this._storage?.set('tasks', this.tasks);
+      await this._storage?.set(config.storageTaskKey, this.tasks);
   }
 
   public patchTask(task: Task, idx: number) {
@@ -52,7 +54,7 @@ export class StorageService {
   }
 
   async saveAllCategories() {
-    await this._storage?.set('categories', this.categories);
+    await this._storage?.set(config.storageCategoriesKey, this.categories);
   }
 
   async clearStorage() {

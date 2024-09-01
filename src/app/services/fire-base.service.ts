@@ -3,6 +3,8 @@ import { FirebaseApp, initializeApp } from "firebase/app";
 import { fetchAndActivate, getRemoteConfig, RemoteConfig, getValue, fetchConfig } from "firebase/remote-config";
 import { environment } from '@environments/environment';
 
+import { config } from './config.firebase'
+
 @Injectable({
   providedIn: 'root'
 })
@@ -27,7 +29,7 @@ export class FireBaseService {
   }
 
   public async fetchCanDeleteTask(){
-    const res = getValue(this.remoteConfig, "can_delete_task");
+    const res = getValue(this.remoteConfig, config.remoteConfigKey);
     this.canDeleteTask = res.asBoolean();
     return this.canDeleteTask;
   }
